@@ -1,0 +1,1979 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: CurrencyCalculator unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #CurrencyCalculator
+    PROPERTIES
+      Name                #CurrencyCalculator
+      Origin              #{E70B0D88-22F0-4A17-8C06-CF4BA401421C}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #/// <summary>
+        #///    The <c>CurrencyCalculator</c> class provides the methods that are required to control the
+        #///    <c>CurrencyCalculator</c> form behavior and handle form events.
+        #/// </summary>
+        #class CurrencyCalculator
+        #{
+        #    FormRun                     formRun;
+        #
+        #    FormReferenceGroupControl   exchangeRateTypeControl;
+        #    FormDateControl             exchangeRateDateControl;
+        #    FormRealControl             fromAmountControl;
+        #    FormStringControl           fromCurrencyCodeControl;
+        #    FormRealControl             toAmountControl;
+        #    FormStringControl           toCurrencyCodeControl;
+        #
+        #    CurrencyExchangeHelper      currencyExchangeHelper;
+        #
+        #    ExchangeRateTypeRecId       exchangeRateType;
+        #
+        #    Amount                      fromAmount;
+        #    Amount                      toAmount;
+        #
+        #    CurrencyCode                fromCurrency;
+        #    CurrencyCode                toCurrency;
+        #
+        #    ExchangeRateDate            exchangeRateDate;
+        #
+        #    boolean                     isToAmountModifiedLast;
+        #}
+      ENDSOURCE
+      SOURCE #editExchangeRateDate
+        #/// <summary>
+        #///    Gets or sets an exchange rate date for which to calculate.
+        #/// </summary>
+        #/// <param name="_set">
+        #///    A Boolean value that specifies if the value should be set.
+        #/// </param>
+        #/// <param name="_exchangeRateDate">
+        #///    An exchange rate date for which to calculate.
+        #/// </param>
+        #/// <returns>
+        #///    An exchange rate date for which to calculate.
+        #/// </returns>
+        #public ExchangeRateDate editExchangeRateDate(boolean _set, ExchangeRateDate _exchangeRateDate)
+        #{
+        #    if (_set)
+        #    {
+        #        exchangeRateDate    = _exchangeRateDate;
+        #        currencyExchangeHelper.parmExchangeDate(exchangeRateDate);
+        #        this.updateAmount();
+        #    }
+        #
+        #    return exchangeRateDate;
+        #}
+      ENDSOURCE
+      SOURCE #editFromAmount
+        #/// <summary>
+        #///    Gets or sets an amount from which to calculate.
+        #/// </summary>
+        #/// <param name="_set">
+        #///    A Boolean value that specifies if the value should be set.
+        #/// </param>
+        #/// <param name="_fromAmount">
+        #///    An amount from which to calculate.
+        #/// </param>
+        #/// <returns>
+        #///    An amount from which to calculate.
+        #/// </returns>
+        #public Amount editFromAmount(boolean _set, real _fromAmount)
+        #{
+        #    if (_set)
+        #    {
+        #        fromAmount              = _fromAmount;
+        #        isToAmountModifiedLast  = false;
+        #        this.updateAmount();
+        #    }
+        #
+        #    return fromAmount;
+        #}
+      ENDSOURCE
+      SOURCE #editFromCurrency
+        #/// <summary>
+        #///    Gets or sets a currency code from which to convert.
+        #/// </summary>
+        #/// <param name="_set">
+        #///    A Boolean value that specifies if the value should be set.
+        #/// </param>
+        #/// <param name="_fromCurrency">
+        #///    A currency code from which to convert.
+        #/// </param>
+        #/// <returns>
+        #///    A currency code from which to convert.
+        #/// </returns>
+        #public CurrencyCode editFromCurrency(boolean _set, CurrencyCode _fromCurrency)
+        #{
+        #    if (_set)
+        #    {
+        #        fromCurrency                = _fromCurrency;
+        #        this.updateAmount();
+        #    }
+        #
+        #    return fromCurrency;
+        #}
+      ENDSOURCE
+      SOURCE #editToAmount
+        #/// <summary>
+        #///    Gets or sets an amount to which to convert.
+        #/// </summary>
+        #/// <param name="_set">
+        #///    A Boolean value that specifies if the value should be set.
+        #/// </param>
+        #/// <param name="_toAmount">
+        #///    An amount to which to convert.
+        #/// </param>
+        #/// <returns>
+        #///    An amount to which to convert.
+        #/// </returns>
+        #public Amount editToAmount(boolean _set, real _toAmount)
+        #{
+        #    if (_set)
+        #    {
+        #        toAmount                = _toAmount;
+        #        isToAmountModifiedLast  = true;
+        #        this.updateAmount();
+        #    }
+        #
+        #    return toAmount;
+        #}
+      ENDSOURCE
+      SOURCE #editToCurrency
+        #/// <summary>
+        #///    Gets or sets a currency code to which to convert.
+        #/// </summary>
+        #/// <param name="_set">
+        #///    A Boolean value that specifies if the value should be set.
+        #/// </param>
+        #/// <param name="_toCurrency">
+        #///    A currency code to which to convert.
+        #/// </param>
+        #/// <returns>
+        #///    A currency code to which to convert.
+        #/// </returns>
+        #public CurrencyCode editToCurrency(boolean _set, CurrencyCode _toCurrency)
+        #{
+        #    if (_set)
+        #    {
+        #        toCurrency                = _toCurrency;
+        #        this.updateAmount();
+        #    }
+        #
+        #    return toCurrency;
+        #}
+      ENDSOURCE
+      SOURCE #formInitPostSuper
+        #/// <summary>
+        #///    Handles a form postinitialization event.
+        #/// </summary>
+        #public void formInitPostSuper()
+        #{
+        #    exchangeRateTypeControl.value(exchangeRateType);
+        #    this.modifiedExchangeRateTypeControl(exchangeRateType);
+        #
+        #    this.setAmountControlsEnabled();
+        #
+        #    fromAmountControl.setFocus();
+        #
+        #}
+      ENDSOURCE
+      SOURCE #formInitPreSuper
+        #/// <summary>
+        #///    Handles a form preinitialization event.
+        #/// </summary>
+        #public void formInitPreSuper()
+        #{
+        #    fromAmount          = 1.00;
+        #    toAmount            = 1.00;
+        #
+        #    fromCurrency        = Ledger::accountingCurrency();
+        #    toCurrency          = Ledger::accountingCurrency();
+        #
+        #    ExchangeRateDate    = systemDateGet();
+        #    exchangeRateType    = Ledger::defaultExchangeRateType(CompanyInfo::findDataArea(curext()).RecId);
+        #
+        #
+        #}
+      ENDSOURCE
+      SOURCE #instantiateHelper
+        #/// <summary>
+        #///    Instantiates classes to convert values in forward and inverse directions.
+        #/// </summary>
+        #protected void instantiateHelper()
+        #{
+        #    if (exchangeRateType)
+        #    {
+        #        currencyExchangeHelper  = CurrencyExchangeHelper::construct();
+        #        currencyExchangeHelper.parmExchangeRateTypeRecId(exchangeRateType);
+        #        currencyExchangeHelper.parmExchangeDate(exchangeRateDate);
+        #    }
+        #    else
+        #    {
+        #        currencyExchangeHelper = null;
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #modifiedExchangeRateTypeControl
+        #/// <summary>
+        #/// Handles exchange rate type form control modified event.
+        #/// </summary>
+        #/// <param name="_exchangeRateType">
+        #/// A value entered into the exchange rate type form control.
+        #/// </param>
+        #public void modifiedExchangeRateTypeControl(ExchangeRateTypeRecId   _exchangeRateType)
+        #{
+        #    exchangeRateType = _exchangeRateType;
+        #    this.instantiateHelper();
+        #    this.updateAmount();
+        #}
+      ENDSOURCE
+      SOURCE #new
+        #protected void new()
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #parmExchangeRateDateControl
+        #public FormDateControl parmExchangeRateDateControl(FormDateControl _exchangeRateDateControl = exchangeRateDateControl)
+        #{
+        #    exchangeRateDateControl = _exchangeRateDateControl;
+        #
+        #    return exchangeRateDateControl;
+        #}
+      ENDSOURCE
+      SOURCE #parmExchangeRateTypeControl
+        #public FormReferenceGroupControl parmExchangeRateTypeControl(FormReferenceGroupControl _exchangeRateTypeControl = exchangeRateTypeControl)
+        #{
+        #    exchangeRateTypeControl = _exchangeRateTypeControl;
+        #
+        #    return exchangeRateTypeControl;
+        #}
+      ENDSOURCE
+      SOURCE #parmFormRun
+        #public FormRun parmFormRun(FormRun _formRun = formRun)
+        #{
+        #    formRun = _formRun;
+        #
+        #    return formRun;
+        #}
+      ENDSOURCE
+      SOURCE #parmFromAmountControl
+        #public FormRealControl parmFromAmountControl(FormRealControl _fromAmountControl = fromAmountControl)
+        #{
+        #    fromAmountControl = _fromAmountControl;
+        #
+        #    return fromAmountControl;
+        #}
+      ENDSOURCE
+      SOURCE #parmFromCurrencyCodeControl
+        #public FormStringControl parmFromCurrencyCodeControl(FormStringControl _fromCurrencyCodeControl = fromCurrencyCodeControl)
+        #{
+        #    fromCurrencyCodeControl = _fromCurrencyCodeControl;
+        #
+        #    return fromCurrencyCodeControl;
+        #}
+      ENDSOURCE
+      SOURCE #parmToAmountControl
+        #public FormRealControl parmToAmountControl(FormRealControl _toAmountControl = toAmountControl)
+        #{
+        #    toAmountControl = _toAmountControl;
+        #
+        #    return toAmountControl;
+        #}
+      ENDSOURCE
+      SOURCE #parmToCurrencyCodeControl
+        #public FormStringControl parmToCurrencyCodeControl(FormStringControl _toCurrencyCodeControl = toCurrencyCodeControl)
+        #{
+        #    toCurrencyCodeControl = _toCurrencyCodeControl;
+        #
+        #    return toCurrencyCodeControl;
+        #}
+      ENDSOURCE
+      SOURCE #setAmountControlsEnabled
+        #/// <summary>
+        #/// Sets enabled state of the value to convert from and value to convert to form controls.
+        #/// </summary>
+        #protected void setAmountControlsEnabled()
+        #{
+        #    boolean enabled = (currencyExchangeHelper != null && exchangeRateType);
+        #
+        #    fromAmountControl.enabled(enabled);
+        #    toAmountControl.enabled(enabled);
+        #}
+      ENDSOURCE
+      SOURCE #updateAmount
+        #/// <summary>
+        #/// Updates either the amount to convert from or the amount to convert to depending on the last user input.
+        #/// </summary>
+        #protected void updateAmount()
+        #{
+        #    if (isToAmountModifiedLast)
+        #    {
+        #        this.updateFromAmount();
+        #    }
+        #    else
+        #    {
+        #        this.updateToAmount();
+        #    }
+        #    this.setAmountControlsEnabled();
+        #}
+      ENDSOURCE
+      SOURCE #updateFromAmount
+        #/// <summary>
+        #///    Updates the amount to which to convert.
+        #/// </summary>
+        #protected void updateFromAmount()
+        #{
+        #    if (currencyExchangeHelper != null && exchangeRateType)
+        #    {
+        #        fromAmount = currencyExchangeHelper.calculateCurrencyToCurrency(toCurrency, fromCurrency, toAmount, true);
+        #    }
+        #    else
+        #    {
+        #        fromAmount = 0;
+        #    }
+        #    fromAmountControl.update();
+        #
+        #}
+      ENDSOURCE
+      SOURCE #updateToAmount
+        #/// <summary>
+        #///    Updates the amount to which to convert.
+        #/// </summary>
+        #protected void updateToAmount()
+        #{
+        #    if (currencyExchangeHelper != null && exchangeRateType)
+        #    {
+        #        toAmount = currencyExchangeHelper.calculateCurrencyToCurrency(fromCurrency, toCurrency, fromAmount, true);
+        #    }
+        #    else
+        #    {
+        #        toAmount = 0;
+        #    }
+        #    toAmountControl.update();
+        #}
+      ENDSOURCE
+      SOURCE #construct
+        #public static CurrencyCalculator construct()
+        #{
+        #    return new CurrencyCalculator();
+        #}
+      ENDSOURCE
+      SOURCE #newFromFormRun
+        #/// <summary>
+        #///    Creates and initializes a new instance of the <c>CurrencyCalculator</c> class.
+        #/// </summary>
+        #/// <param name="_formRun">
+        #///    A <c>FormRun</c> object.
+        #/// </param>
+        #/// <returns>
+        #///    A new instance of the <c>CurrencyCalculator</c> class.
+        #/// </returns>
+        #/// <exception cref="M:Exception::Error">
+        #///    A <c>FormRun</c> object was not passed to the method.
+        #/// </exception>
+        #/// <exception cref="M:Exception::Error">
+        #///    An invalid caller.
+        #/// </exception>
+        #public static CurrencyCalculator newFromFormRun(FormRun _formRun)
+        #{
+        #    CurrencyCalculator  currencyCalculator;
+        #    FormRun             callerFormRun;
+        #
+        #    if (!_formRun)
+        #    {
+        #        throw error(Error::wrongUseOfFunction(funcName()));
+        #    }
+        #
+        #    if (_formRun.args() && _formRun.args().caller())
+        #    {
+        #        callerFormRun   = _formRun.args().caller() as FormRun;
+        #        if (callerFormRun == null)
+        #        {
+        #            throw error(Error::wrongUseOfFunction(funcName()));
+        #        }
+        #    }
+        #    else
+        #    {
+        #        currencyCalculator = CurrencyCalculator::construct();
+        #    }
+        #
+        #    currencyCalculator.parmFormRun(_formRun);
+        #
+        #    return currencyCalculator;
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: FRM
+
+; Microsoft Dynamics AX Forms unloaded
+; --------------------------------------------------------------------------------
+FRMVERSION 12
+
+FORM #CurrencyCalculator
+  PROPERTIES
+    Name                #CurrencyCalculator
+    Origin              #{D4685E9F-475C-402C-9EBA-F89455EC26D1}
+  ENDPROPERTIES
+  
+  METHODS
+    SOURCE #classDeclaration
+      #class FormRun extends ObjectRun
+      #{
+      #    CurrencyCalculator      currencyCalculator;
+      #}
+      #
+    ENDSOURCE
+    SOURCE #currencyCalculator
+      #public CurrencyCalculator currencyCalculator()
+      #{
+      #    if (!currencyCalculator)
+      #    {
+      #        currencyCalculator = CurrencyCalculator::newFromFormRun(this);
+      #    }
+      #
+      #    return currencyCalculator;
+      #}
+    ENDSOURCE
+    SOURCE #editExchangeRateDate
+      #edit ExchangeRateDate editExchangeRateDate(boolean _set, ExchangeRateDate _exchangeRateDate)
+      #{
+      #    return this.currencyCalculator().editExchangeRateDate(_set, _exchangeRateDate);
+      #}
+    ENDSOURCE
+    SOURCE #editFromAmount
+      #edit Amount editFromAmount(boolean _set, Amount _fromAmount)
+      #{
+      #    return this.currencyCalculator().editFromAmount(_set, _fromAmount);
+      #}
+    ENDSOURCE
+    SOURCE #editFromCurrency
+      #edit CurrencyCode editFromCurrency(boolean _set, CurrencyCode _fromCurrency)
+      #{
+      #    return this.currencyCalculator().editFromCurrency(_set, _fromCurrency);
+      #}
+    ENDSOURCE
+    SOURCE #editToAmount
+      #edit Amount editToAmount(boolean _set, Amount _toAmount)
+      #{
+      #    return this.currencyCalculator().editToAmount(_set, _toAmount);
+      #}
+    ENDSOURCE
+    SOURCE #editToCurrency
+      #edit CurrencyCode editToCurrency(boolean _set, CurrencyCode _toCurrency)
+      #{
+      #    return this.currencyCalculator().editToCurrency(_set, _toCurrency);
+      #}
+    ENDSOURCE
+    SOURCE #init
+      #public void init()
+      #{
+      #    this.currencyCalculator().formInitPreSuper();
+      #
+      #    super();
+      #
+      #    this.currencyCalculator().parmExchangeRateTypeControl(exchangeRateType);
+      #    this.currencyCalculator().parmExchangeRateDateControl(exchangeRateDateEdit);
+      #    this.currencyCalculator().parmFromAmountControl(fromAmountEdit);
+      #    this.currencyCalculator().parmFromCurrencyCodeControl(fromCurrencyCodeEdit);
+      #    this.currencyCalculator().parmToAmountControl(toAmountEdit);
+      #    this.currencyCalculator().parmToCurrencyCodeControl(toCurrencyCodeEdit);
+      #
+      #    this.currencyCalculator().formInitPostSuper();
+      #}
+    ENDSOURCE
+  ENDMETHODS
+  OBJECTBANK
+    PROPERTIES
+    ENDPROPERTIES
+    
+  ENDOBJECTBANK
+  
+  REFERENCEDATASOURCES
+  ENDREFERENCEDATASOURCES
+  
+  JOINS
+  ENDJOINS
+  
+  PARTREFERENCES
+  ENDPARTREFERENCES
+  
+  DESIGN
+    PROPERTIES
+      Caption             #@CUR2
+      Frame               #Dialog
+      WindowType          #Popup
+      HideToolbar         #Yes
+      SetCompany          #No
+      Style               #Dialog
+    ENDPROPERTIES
+    
+    CONTAINER
+      CONTROL BUTTONGROUP
+        PROPERTIES
+          Name                #ButtonGroup
+          Left                #Auto (right)
+          ElementPosition     #1431655764
+          HierarchyParent     #DialogCommit
+          Style               #DialogCommitContainer
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL GROUP
+        PROPERTIES
+          Name                #CalculatorGroup
+          ElementPosition     #1717986916
+          HierarchyParent     #DialogContent
+          FrameType           #None
+          Columns             #5
+          ArrangeGuide        
+            ARRAY INDEX Columns 
+              #0
+              #0
+              #0
+              #0
+              #0
+            ENDARRAY
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL GROUP
+        PROPERTIES
+          Name                #DialogCommit
+          ElementPosition     #1431655764
+          Style               #DialogCommit
+          AlignChild          #No
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL GROUP
+        PROPERTIES
+          Name                #DialogContent
+          ElementPosition     #715827882
+          Style               #DialogContent
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL GROUP
+        PROPERTIES
+          Name                #ExchangeRateGroup
+          ElementPosition     #1288490187
+          HierarchyParent     #DialogContent
+          FrameType           #None
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL REFERENCEGROUP
+        PROPERTIES
+          Name                #exchangeRateType
+          AutoDeclaration     #Yes
+          ElementPosition     #1073741822
+          HierarchyParent     #ExchangeRateGroup
+          ExtendedDataType    #ExchangeRateTypeRecId
+        ENDPROPERTIES
+        
+        METHODS
+          SOURCE #modified
+            #public boolean modified()
+            #{
+            #    element.currencyCalculator().modifiedExchangeRateTypeControl(this.value());
+            #    return super();
+            #}
+          ENDSOURCE
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL COMMANDBUTTON
+        PROPERTIES
+          Name                #CommandButton
+          ElementPosition     #1431655764
+          HierarchyParent     #ButtonGroup
+          Text                #@SYS15212
+          DefaultButton       #Yes
+          Command             #263
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL DATEEDIT
+        PROPERTIES
+          Name                #exchangeRateDateEdit
+          AutoDeclaration     #Yes
+          Width               #100
+          ElementPosition     #1610612733
+          HierarchyParent     #ExchangeRateGroup
+          DataMethod          #editExchangeRateDate
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL REALEDIT
+        PROPERTIES
+          Name                #fromAmountEdit
+          AutoDeclaration     #Yes
+          HelpText            #@CUR4
+          ElementPosition     #613566756
+          HierarchyParent     #CalculatorGroup
+          ShowLabel           #No
+          DataMethod          #editFromAmount
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL REALEDIT
+        PROPERTIES
+          Name                #toAmountEdit
+          AutoDeclaration     #Yes
+          HelpText            #@CUR5
+          ElementPosition     #1533916890
+          HierarchyParent     #CalculatorGroup
+          ShowLabel           #No
+          DataMethod          #editToAmount
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL STATICTEXT
+        PROPERTIES
+          Name                #MainInstruction
+          ElementPosition     #858993458
+          HierarchyParent     #DialogContent
+          Text                #@CUR6
+          Style               #MainInstruction
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL STATICTEXT
+        PROPERTIES
+          Name                #StaticText
+          Skip                #Yes
+          ElementPosition     #1227133512
+          HierarchyParent     #CalculatorGroup
+          Text                #=
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL STRINGEDIT
+        PROPERTIES
+          Name                #fromCurrencyCodeEdit
+          AutoDeclaration     #Yes
+          ElementPosition     #920350134
+          HierarchyParent     #CalculatorGroup
+          ShowLabel           #No
+          DataMethod          #editFromCurrency
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+      CONTROL STRINGEDIT
+        PROPERTIES
+          Name                #toCurrencyCodeEdit
+          AutoDeclaration     #Yes
+          ElementPosition     #1840700268
+          HierarchyParent     #CalculatorGroup
+          ShowLabel           #No
+          DataMethod          #editToCurrency
+        ENDPROPERTIES
+        
+        METHODS
+        ENDMETHODS
+      ENDCONTROL 
+      
+    ENDCONTAINER
+    
+  ENDDESIGN
+  
+  PERMISSIONS #Permissions
+    PROPERTIES
+    ENDPROPERTIES
+    
+    PERMISSIONSET #Read
+      PROPERTIES
+      ENDPROPERTIES
+      
+      FORM #Controls
+      ENDFORM
+      
+    TABLES #Tables
+    ENDTABLES
+    
+  SERVERMETHODS #Server Methods
+  ENDSERVERMETHODS
+  
+ASSOCIATEDFORMS #Associated Forms
+ENDASSOCIATEDFORMS
+
+ENDPERMISSIONSET
+
+PERMISSIONSET #Update
+  PROPERTIES
+  ENDPROPERTIES
+  
+  FORM #Controls
+  ENDFORM
+  
+TABLES #Tables
+ENDTABLES
+
+SERVERMETHODS #Server Methods
+ENDSERVERMETHODS
+
+ASSOCIATEDFORMS #Associated Forms
+ENDASSOCIATEDFORMS
+
+ENDPERMISSIONSET
+
+PERMISSIONSET #Create
+  PROPERTIES
+  ENDPROPERTIES
+  
+  FORM #Controls
+  ENDFORM
+  
+TABLES #Tables
+ENDTABLES
+
+SERVERMETHODS #Server Methods
+ENDSERVERMETHODS
+
+ASSOCIATEDFORMS #Associated Forms
+ENDASSOCIATEDFORMS
+
+ENDPERMISSIONSET
+
+PERMISSIONSET #Delete
+  PROPERTIES
+  ENDPROPERTIES
+  
+  FORM #Controls
+  ENDFORM
+  
+TABLES #Tables
+ENDTABLES
+
+SERVERMETHODS #Server Methods
+ENDSERVERMETHODS
+
+ASSOCIATEDFORMS #Associated Forms
+ENDASSOCIATEDFORMS
+
+ENDPERMISSIONSET
+
+ENDPERMISSIONS
+
+ENDFORM
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculator for currencies</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR2</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Close</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@SYS15212</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Amount in from-currency.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR4</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Amount in to-currency.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR5</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculate between currencies</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR6</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: MNU
+
+; Microsoft Dynamics AX Menu : GlobalToolsMenu unloaded
+; --------------------------------------------------------------------------------
+  MNUVERSION 5
+  
+  MENU #GlobalToolsMenu
+    PROPERTIES
+      Name                #GlobalToolsMenu
+      Label               #@SYS24039
+      Origin              #{100F0000-0000-1000-FCC4-2023DD7F885F}
+    ENDPROPERTIES
+    
+    MENUITEM
+      PROPERTIES
+        Name                #Telephone list
+        MenuItemName        #emplworklocalPhone
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Session date and time
+        MenuItemName        #SystemDate
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator
+        MenuItemType        #Action
+        MenuItemName        #Calculator
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator for currencies
+        MenuItemName        #CurrencyCalculator
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator for units
+        MenuItemName        #UnitOfMeasureCalculator
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Print archive
+        MenuItemName        #sysprintArchiveuser
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Select company accounts
+        MenuItemName        #SysDataAreaSelect
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Select currency
+        MenuItemName        #SysCurrencySelect
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Manage alert rules
+        MenuItemName        #EventRule
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Alerts - event inbox
+        MenuItemName        #EventAlertInbox
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Task recorder
+        MenuItemType        #Action
+        MenuItemName        #SysTaskRecorderToolbar
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    SEPARATOR
+    MENUREFERENCE
+      PROPERTIES
+        Name                #SRSReportingToolsMenu
+      ENDPROPERTIES
+      
+    ENDMENUREFERENCE
+    SEPARATOR
+    MENUITEM
+      PROPERTIES
+        Name                #Customize
+        MenuItemName        #SysUserSetupToolbar
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Options
+        MenuItemName        #SysUserSetup
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+  ENDMENU
+  
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Tools</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@SYS24039</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: FTM
+
+; Microsoft Dynamics AX MENUITEM : CurrencyCalculator unloaded
+; --------------------------------------------------------------------------------
+  VERSION 1
+  
+  MENUITEM #CurrencyCalculator
+    Type: 1
+    PROPERTIES
+      Name                #CurrencyCalculator
+      Label               #@CUR2
+      HelpText            #@CUR3
+      Object              #CurrencyCalculator
+      RunOn               #Called from
+      SecurityKey         #BasicMisc
+      Origin              #{60679853-0303-40E5-8618-EEADA0F1F34B}
+    ENDPROPERTIES
+    
+  ENDMENUITEM
+  
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculator for currencies</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR2</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculate currency conversions based on your setup in the Exchange rates form.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR3</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: SPV
+
+; Microsoft Dynamics AX PRIVILEGE : ClientEssentials unloaded
+; --------------------------------------------------------------------------------
+  VERSION 1
+  
+  PRIVILEGE #ClientEssentials
+    PROPERTIES
+      Name                #ClientEssentials
+      Label               #@SYS323382
+      Description         #@SYS323383
+      Origin              #{FA4042A0-7724-4F41-A891-2C1656F9EF55}
+    ENDPROPERTIES
+    
+    ENTRYPOINTS #Entry Points
+      ENTRYPOINT #Calculator
+        PROPERTIES
+          Name                #Calculator
+          ObjectType          #MenuItemAction
+          ObjectName          #Calculator
+          AccessLevel         #Delete
+        ENDPROPERTIES
+        
+      ENDENTRYPOINT
+      
+    ENTRYPOINT #CurrencyCalculator
+      PROPERTIES
+        Name                #CurrencyCalculator
+        ObjectType          #MenuItemDisplay
+        ObjectName          #CurrencyCalculator
+        AccessLevel         #Delete
+      ENDPROPERTIES
+      
+    ENDENTRYPOINT
+    
+  ENTRYPOINT #DocuActionNew
+    PROPERTIES
+      Name                #DocuActionNew
+      ObjectType          #MenuItemAction
+      ObjectName          #DocuActionNew
+      AccessLevel         #Delete
+    ENDPROPERTIES
+    
+  ENDENTRYPOINT
+  
+ENTRYPOINT #DocuActionOpen
+  PROPERTIES
+    Name                #DocuActionOpen
+    ObjectType          #MenuItemAction
+    ObjectName          #DocuActionOpen
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuActionOption
+  PROPERTIES
+    Name                #DocuActionOption
+    ObjectType          #MenuItemAction
+    ObjectName          #DocuActionOption
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuActionPrint
+  PROPERTIES
+    Name                #DocuActionPrint
+    ObjectType          #MenuItemAction
+    ObjectName          #DocuActionPrint
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuOpenFile
+  PROPERTIES
+    Name                #DocuOpenFile
+    ObjectType          #MenuItemDisplay
+    ObjectName          #DocuOpenFile
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuOptionView
+  PROPERTIES
+    Name                #DocuOptionView
+    ObjectType          #MenuItemDisplay
+    ObjectName          #DocuOptionView
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuReference
+  PROPERTIES
+    Name                #DocuReference
+    ObjectType          #MenuItemDisplay
+    ObjectName          #DocuReference
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuView
+  PROPERTIES
+    Name                #DocuView
+    ObjectType          #MenuItemDisplay
+    ObjectName          #DocuView
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #DocuViewAction
+  PROPERTIES
+    Name                #DocuViewAction
+    ObjectType          #MenuItemDisplay
+    ObjectName          #DocuViewAction
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #EPDefaultRoleCenter
+  PROPERTIES
+    Name                #EPDefaultRoleCenter
+    ObjectType          #WebUrlItem
+    ObjectName          #EPDefaultRoleCenter
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #EventRule
+  PROPERTIES
+    Name                #EventRule
+    ObjectType          #MenuItemDisplay
+    ObjectName          #EventRule
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysCurrencySelect
+  PROPERTIES
+    Name                #SysCurrencySelect
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SYSCURRENCYSELECT
+    AccessLevel         #Read
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesCreateDefaultFavGroup
+  PROPERTIES
+    Name                #SysFavoritesCreateDefaultFavGroup
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesCreateDefaultFavGroup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesCreateFavGroup
+  PROPERTIES
+    Name                #SysFavoritesCreateFavGroup
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesCreateFavGroup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesCreateFolder
+  PROPERTIES
+    Name                #SysFavoritesCreateFolder
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesCreateFolder
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesCreateFolderInGroup
+  PROPERTIES
+    Name                #SysFavoritesCreateFolderInGroup
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesCreateFolderInGroup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesDeleteFavGroup
+  PROPERTIES
+    Name                #SysFavoritesDeleteFavGroup
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesDeleteFavGroup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesDeleteFavorite
+  PROPERTIES
+    Name                #SysFavoritesDeleteFavorite
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesDeleteFavorite
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesOrganizeFavorites
+  PROPERTIES
+    Name                #SysFavoritesOrganizeFavorites
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesOrganizeFavorites
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesRenameFavorite
+  PROPERTIES
+    Name                #SysFavoritesRenameFavorite
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesRenameFavorite
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysFavoritesRenameGroup
+  PROPERTIES
+    Name                #SysFavoritesRenameGroup
+    ObjectType          #MenuItemAction
+    ObjectName          #SysFavoritesRenameGroup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysHelpConfiguration
+  PROPERTIES
+    Name                #SysHelpConfiguration
+    ObjectType          #ServiceOperation
+    ObjectName          #SysHelpConfiguration
+    ObjectChildName     #getHelpServerLocation
+    AccessLevel         #Invoke
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysInfoLog
+  PROPERTIES
+    Name                #SysInfoLog
+    ObjectType          #MenuItemOutput
+    ObjectName          #SysInfoLog
+    AccessLevel         #Read
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysLastValue
+  PROPERTIES
+    Name                #SysLastValue
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysLastValue
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysLaunchGettingStarted
+  PROPERTIES
+    Name                #SysLaunchGettingStarted
+    ObjectType          #MenuItemAction
+    ObjectName          #SysLaunchGettingStarted
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysModelsInstalled
+  PROPERTIES
+    Name                #SysModelsInstalled
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysModelsInstalled
+    AccessLevel         #Read
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysNavPaneOptionsDialog
+  PROPERTIES
+    Name                #SysNavPaneOptionsDialog
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysNavPaneOptionsDialog
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysNavPaneOptionsDialog(Action)
+  PROPERTIES
+    Name                #SysNavPaneOptionsDialog(Action)
+    ObjectType          #MenuItemAction
+    ObjectName          #SysNavPaneOptionsDialog
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysPrintArchiveUser
+  PROPERTIES
+    Name                #SysPrintArchiveUser
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysPrintArchiveUser
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysPrivacyStatement
+  PROPERTIES
+    Name                #SysPrivacyStatement
+    ObjectType          #MenuItemAction
+    ObjectName          #SysPrivacyStatement
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysReadMoreCEIPUrl
+  PROPERTIES
+    Name                #SysReadMoreCEIPUrl
+    ObjectType          #MenuItemAction
+    ObjectName          #SysReadMoreCEIPUrl
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysReportAutoWizardNew
+  PROPERTIES
+    Name                #SysReportAutoWizardNew
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysReportAutoWizardNew
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysSetupBasic
+  PROPERTIES
+    Name                #SysSetupBasic
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysSetupBasic
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysSetupForm
+  PROPERTIES
+    Name                #SysSetupForm
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysSetupForm
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysTaskRecorderDocGenerator
+  PROPERTIES
+    Name                #SysTaskRecorderDocGenerator
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysTaskRecorderDocGenerator
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysTaskRecorderSaveTask
+  PROPERTIES
+    Name                #SysTaskRecorderSaveTask
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysTaskRecorderSaveTask
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysTaskRecorderScripts
+  PROPERTIES
+    Name                #SysTaskRecorderScripts
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysTaskRecorderScripts
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysTaskRecorderToolbar
+  PROPERTIES
+    Name                #SysTaskRecorderToolbar
+    ObjectType          #MenuItemAction
+    ObjectName          #SysTaskRecorderToolbar
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SystemDate
+  PROPERTIES
+    Name                #SystemDate
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SystemDate
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SystemInfo
+  PROPERTIES
+    Name                #SystemInfo
+    ObjectType          #MenuItemAction
+    ObjectName          #SystemInfo
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysToolTipPreview
+  PROPERTIES
+    Name                #SysToolTipPreview
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysToolTipPreview
+    AccessLevel         #Read
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysUserSetup
+  PROPERTIES
+    Name                #SysUserSetup
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysUserSetup
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysUserSetupToolbar
+  PROPERTIES
+    Name                #SysUserSetupToolbar
+    ObjectType          #MenuItemDisplay
+    ObjectName          #SysUserSetupToolbar
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysWizardBack
+  PROPERTIES
+    Name                #SysWizardBack
+    ObjectType          #MenuItemAction
+    ObjectName          #SysWizardBack
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysWizardCancel
+  PROPERTIES
+    Name                #SysWizardCancel
+    ObjectType          #MenuItemAction
+    ObjectName          #SysWizardCancel
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysWizardFinish
+  PROPERTIES
+    Name                #SysWizardFinish
+    ObjectType          #MenuItemAction
+    ObjectName          #SysWizardFinish
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENTRYPOINT #SysWizardNext
+  PROPERTIES
+    Name                #SysWizardNext
+    ObjectType          #MenuItemAction
+    ObjectName          #SysWizardNext
+    AccessLevel         #Delete
+  ENDPROPERTIES
+  
+ENDENTRYPOINT
+
+ENDENTRYPOINTS
+
+PERMISSIONSET #Permissions
+  PROPERTIES
+  ENDPROPERTIES
+  
+  TABLES #Tables
+    TABLE #DataArea
+      PROPERTIES
+        Table               #DataArea
+        EffectiveAccess     #Delete
+        ManagedBy           #Manual
+      ENDPROPERTIES
+      
+    ENDTABLE
+    
+  TABLE #DirPartyLocation
+    PROPERTIES
+      Table               #DirPartyLocation
+      EffectiveAccess     #Delete
+      ManagedBy           #Manual
+    ENDPROPERTIES
+    
+  ENDTABLE
+  
+TABLE #DirPersonUser
+  PROPERTIES
+    Table               #DirPersonUser
+    EffectiveAccess     #Read
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #DocuOpenFile
+  PROPERTIES
+    Table               #DocuOpenFile
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #DocuRef
+  PROPERTIES
+    Table               #DocuRef
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #EventRule
+  PROPERTIES
+    Table               #EventRule
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #EventRuleData
+  PROPERTIES
+    Table               #EventRuleData
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #LogisticsElectronicAddress
+  PROPERTIES
+    Table               #LogisticsElectronicAddress
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #LogisticsLocation
+  PROPERTIES
+    Table               #LogisticsLocation
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #NumberSequenceDatatype
+  PROPERTIES
+    Table               #NumberSequenceDatatype
+    EffectiveAccess     #Read
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #NumberSequenceDatatypeParameterType
+  PROPERTIES
+    Table               #NumberSequenceDatatypeParameterType
+    EffectiveAccess     #Read
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #NumberSequenceScope
+  PROPERTIES
+    Table               #NumberSequenceScope
+    EffectiveAccess     #Create
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #PrintJobHeader
+  PROPERTIES
+    Table               #PrintJobHeader
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SubQuery
+  PROPERTIES
+    Table               #SubQuery
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysClientPerf
+  PROPERTIES
+    Table               #SysClientPerf
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysCue
+  PROPERTIES
+    Table               #SysCue
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysInetThemeTable
+  PROPERTIES
+    Table               #SysInetThemeTable
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysLastValue
+  PROPERTIES
+    Table               #SysLastValue
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysSearchName
+  PROPERTIES
+    Table               #SysSearchName
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysSearchPath
+  PROPERTIES
+    Table               #SysSearchPath
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysSearchRef
+  PROPERTIES
+    Table               #SysSearchRef
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #SysUserInfo
+  PROPERTIES
+    Table               #SysUserInfo
+    EffectiveAccess     #Update
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #TmpSysQuery
+  PROPERTIES
+    Table               #TmpSysQuery
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #TmpSysQueryCompanyRange
+  PROPERTIES
+    Table               #TmpSysQueryCompanyRange
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #TmpSysQueryValidTimeRange
+  PROPERTIES
+    Table               #TmpSysQueryValidTimeRange
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #TmpUtil
+  PROPERTIES
+    Table               #TmpUtil
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #UserExternalParty
+  PROPERTIES
+    Table               #UserExternalParty
+    EffectiveAccess     #Read
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #UserInfo
+  PROPERTIES
+    Table               #UserInfo
+    EffectiveAccess     #Update
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #UserInfoStartupModel
+  PROPERTIES
+    Table               #UserInfoStartupModel
+    EffectiveAccess     #Create
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #VirtualDataAreaList
+  PROPERTIES
+    Table               #VirtualDataAreaList
+    EffectiveAccess     #Read
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #WorkflowWorkItemCommentTable
+  PROPERTIES
+    Table               #WorkflowWorkItemCommentTable
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+TABLE #WorkflowWorkItemDelegationParameters
+  PROPERTIES
+    Table               #WorkflowWorkItemDelegationParameters
+    EffectiveAccess     #Delete
+    ManagedBy           #Manual
+  ENDPROPERTIES
+  
+ENDTABLE
+
+ENDTABLES
+
+SERVERMETHODS #Server Methods
+ENDSERVERMETHODS
+
+FORMS #Forms
+ENDFORMS
+
+ENDPERMISSIONSET
+
+ENDPRIVILEGE
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Client essentials</Table:Field>
+    <Table:Field name="Description">Security privilege name</Table:Field>
+    <Table:Field name="LabelId">@SYS323382</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Common permissions required to access the client</Table:Field>
+    <Table:Field name="Description">Security privilege description</Table:Field>
+    <Table:Field name="LabelId">@SYS323383</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: PRN
+
+; Microsoft Dynamics AX Project : CurrencyCalculator unloaded
+; --------------------------------------------------------------------------------
+  PROJECTVERSION 2
+  
+  PROJECT #CurrencyCalculator
+  SHARED
+  PROPERTIES
+    Name                #CurrencyCalculator
+    Origin              #{2257ADF0-80F3-46E0-BAA9-4A59D6559424}
+  ENDPROPERTIES
+  
+    PROJECTCLASS ProjectNode
+    GROUP #Classes
+      PROPERTIES
+        Name                #Classes
+        ProjectGroupType    #Classes
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      BEGINNODE
+        FILETYPE 0
+        UTILTYPE 45
+        UTILOBJECTID 1024532
+        NODETYPE 329
+        NAME #CurrencyCalculator
+      ENDNODE
+      ENDGROUP
+      
+    GROUP #Forms
+      PROPERTIES
+        Name                #Forms
+        ProjectGroupType    #Forms
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      BEGINNODE
+        FILETYPE 0
+        UTILTYPE 11
+        UTILOBJECTID 0
+        NODETYPE 201
+        NAME #CurrencyCalculator
+      ENDNODE
+      ENDGROUP
+      
+    GROUP #Menus
+      PROPERTIES
+        Name                #Menus
+        ProjectGroupType    #Menus
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      BEGINNODE
+        FILETYPE 0
+        UTILTYPE 16
+        UTILOBJECTID 0
+        NODETYPE 205
+        NAME #GlobalToolsMenu
+      ENDNODE
+      ENDGROUP
+      
+    GROUP #MenuItems
+      PROPERTIES
+        Name                #MenuItems
+        ProjectGroupType    #MenuItems
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      GROUP #Display
+        PROPERTIES
+          Name                #Display
+          ProjectGroupType    #Display
+          GroupMask           #
+          PreventEditProperties #No
+        ENDPROPERTIES
+        
+        BEGINNODE
+          FILETYPE 0
+          UTILTYPE 1
+          UTILOBJECTID 0
+          NODETYPE 296
+          NAME #CurrencyCalculator
+        ENDNODE
+        ENDGROUP
+        
+      ENDGROUP
+      
+    GROUP #Security
+      PROPERTIES
+        Name                #Security
+        ProjectGroupType    #Security
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      GROUP #Privileges
+        PROPERTIES
+          Name                #Privileges
+          ProjectGroupType    #SecurityPrivileges
+          GroupMask           #
+          PreventEditProperties #No
+        ENDPROPERTIES
+        
+        BEGINNODE
+          FILETYPE 0
+          UTILTYPE 134
+          UTILOBJECTID 0
+          NODETYPE 1628
+          NAME #ClientEssentials
+        ENDNODE
+        ENDGROUP
+        
+      ENDGROUP
+      
+  ENDPROJECT
+  
+
+***Element: END

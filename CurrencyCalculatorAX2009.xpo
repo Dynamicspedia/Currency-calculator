@@ -1,0 +1,493 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: FRM
+
+; Microsoft Dynamics AX Forms unloaded
+; --------------------------------------------------------------------------------
+FRMVERSION 5
+
+FORM #CurrencyCalculator
+  PROPERTIES
+    Name                #CurrencyCalculator
+  ENDPROPERTIES
+  
+  METHODS
+    Version: 3
+    SOURCE #classDeclaration
+      #class FormRun extends ObjectRun
+      #{
+      #    CurrencyCode    currencyCodeFrom, currencyCodeTo, otherCode;
+      #    Amount          amountFrom, amountTo;
+      #    TransDate       exchRateDate;
+      #}
+      #
+    ENDSOURCE
+    SOURCE #amountFrom
+      #//BP Deviation documented
+      #edit Amount amountFrom(boolean set, Amount _amountFrom)
+      #{
+      #    if (set)
+      #    {
+      #        amountFrom      = _amountFrom;
+      #        amountTo        = Currency::curAmount2CurAmount(amountFrom, currencyCodeFrom, currencyCodeTo, exchRateDate);
+      #        ctrlAmountTo.update();
+      #    }
+      #    return amountFrom;
+      #}
+    ENDSOURCE
+    SOURCE #amountTo
+      #//BP Deviation documented
+      #edit Amount amountTo(boolean set, Amount _amountTo)
+      #{
+      #    if (set)
+      #    {
+      #        amountTo    = _amountTo;
+      #        amountFrom  = Currency::curAmount2CurAmount(amountTo, currencyCodeTo, currencyCodeFrom, exchRateDate);
+      #        ctrlAmountFrom.update();
+      #    }
+      #    return amountTo;
+      #}
+    ENDSOURCE
+    SOURCE #currencyCodeFrom
+      #//BP Deviation documented
+      #edit CurrencyCode currencyCodeFrom(boolean set, CurrencyCode _currencyCodeFrom)
+      #{
+      #    if (set)
+      #    {
+      #        currencyCodeFrom    = _currencyCodeFrom;
+      #        amountTo            = Currency::curAmount2CurAmount(amountFrom, currencyCodeFrom, currencyCodeTo, exchRateDate);
+      #        ctrlAmountTo.update();
+      #    }
+      #    return currencyCodeFrom;
+      #}
+    ENDSOURCE
+    SOURCE #currencyCodeTo
+      #//BP Deviation documented
+      #edit CurrencyCode currencyCodeTo(boolean set, CurrencyCode _currencyCodeTo)
+      #{
+      #    if (set)
+      #    {
+      #        currencyCodeTo    = _currencyCodeTo;
+      #        amountTo          = Currency::curAmount2CurAmount(amountFrom, currencyCodeFrom, currencyCodeTo, exchRateDate);
+      #        ctrlAmountTo.update();
+      #    }
+      #    return currencyCodeTo;
+      #}
+    ENDSOURCE
+    SOURCE #exchRateDate
+      #//BP Deviation documented
+      #edit TransDate exchRateDate(boolean set, TransDate _exchRateDate)
+      #{
+      #    if (set)
+      #    {
+      #        exchRateDate    = _exchRateDate;
+      #        amountTo        = Currency::curAmount2CurAmount(amountFrom, currencyCodeFrom, currencyCodeTo, exchRateDate);
+      #        ctrlAmountTo.update();
+      #    }
+      #    return exchRateDate;
+      #}
+    ENDSOURCE
+    SOURCE #init
+      #void init()
+      #{
+      #    amountFrom          = 1;
+      #    amountTo            = 1;
+      #
+      #    currencyCodeFrom    = CompanyInfo::standardCurrency();
+      #    currencyCodeTo      = CompanyInfo::standardCurrency();
+      #
+      #    super();
+      #}
+    ENDSOURCE
+  ENDMETHODS
+  OBJECTBANK
+    PROPERTIES
+    ENDPROPERTIES
+    
+  ENDOBJECTBANK
+  
+  JOINS
+  ENDJOINS
+  
+  DESIGN
+    PROPERTIES
+      Caption             #@CUR1
+      HideToolbar         #Yes
+      HideIfEmpty         #No
+      StatusBarStyle      #Simple
+    ENDPROPERTIES
+    
+    CONTAINER
+      CONTROL GROUP
+        PROPERTIES
+          Name                #ExchRateDateGroup
+          FrameType           #None
+        ENDPROPERTIES
+        
+          CONTAINER
+            CONTROL DATEEDIT
+              PROPERTIES
+                Name                #exchRateDate
+                DataMethod          #exchRateDate
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+          ENDCONTAINER
+          
+      ENDCONTROL 
+      
+      CONTROL GROUP
+        PROPERTIES
+          Name                #Calculator
+          FrameType           #None
+          Columns             #5
+          ArrangeGuide        
+            ARRAY INDEX Columns 
+              #0
+              #0
+              #0
+              #0
+              #0
+            ENDARRAY
+        ENDPROPERTIES
+        
+          CONTAINER
+            CONTROL REALEDIT
+              PROPERTIES
+                Name                #ctrlAmountFrom
+                AutoDeclaration     #Yes
+                HelpText            #@CUR3
+                ShowLabel           #No
+                DataMethod          #amountFrom
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+            CONTROL STRINGEDIT
+              PROPERTIES
+                Name                #currencyCodeFrom
+                ShowLabel           #No
+                DataMethod          #currencyCodeFrom
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+            CONTROL STATICTEXT
+              PROPERTIES
+                Name                #StaticText
+                Skip                #Yes
+                Text                #=
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+            CONTROL REALEDIT
+              PROPERTIES
+                Name                #ctrlAmountTo
+                AutoDeclaration     #Yes
+                HelpText            #@CUR4
+                ShowLabel           #No
+                DataMethod          #amountTo
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+            CONTROL STRINGEDIT
+              PROPERTIES
+                Name                #currencyCodeTo
+                ShowLabel           #No
+                DataMethod          #currencyCodeTo
+              ENDPROPERTIES
+              
+            ENDCONTROL 
+            
+          ENDCONTAINER
+          
+      ENDCONTROL 
+      
+    ENDCONTAINER
+    
+  ENDDESIGN
+  
+ENDFORM
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculator for currencies</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR1</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Amount in from-currency.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR3</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Amount in to-currency.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR4</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: MNU
+
+; Microsoft Dynamics AX Menu : GlobalToolsMenu unloaded
+; --------------------------------------------------------------------------------
+  MNUVERSION 4
+  
+  MENU #GlobalToolsMenu
+    PROPERTIES
+      Name                #GlobalToolsMenu
+      Label               #@SYS24039
+      HelpText            #@SYS88481
+    ENDPROPERTIES
+    
+    MENUITEM
+      PROPERTIES
+        Name                #Telephone list
+        MenuItemName        #emplworklocalPhone
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Session date
+        MenuItemName        #SystemDate
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator
+        MenuItemType        #Action
+        MenuItemName        #Calculator
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator for currencies
+        MenuItemName        #CurrencyCalculator
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Calculator for units
+        MenuItemName        #UnitConversion
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Print archive
+        MenuItemName        #sysprintArchiveuser
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Select company accounts
+        MenuItemName        #SysDataAreaSelect
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Manage alert rules
+        MenuItemName        #EventRule
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Task Recorder
+        MenuItemType        #Action
+        MenuItemName        #SysTaskRecorderToolbar
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    SEPARATOR
+    MENUREFERENCE
+      PROPERTIES
+        Name                #DevelopmentTools
+      ENDPROPERTIES
+      
+    ENDMENUREFERENCE
+    MENUREFERENCE
+      PROPERTIES
+        Name                #SRSReportingToolsMenu
+      ENDPROPERTIES
+      
+    ENDMENUREFERENCE
+    SEPARATOR
+    MENUITEM
+      PROPERTIES
+        Name                #Customize...
+        MenuItemName        #SysUserSetupToolbar
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+    MENUITEM
+      PROPERTIES
+        Name                #Options...
+        MenuItemName        #SysUserSetup
+      ENDPROPERTIES
+      
+    ENDMENUITEM
+  ENDMENU
+  
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Tools</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@SYS24039</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Tools menu on the top-level window</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@SYS88481</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: FTM
+
+; Microsoft Dynamics AX MENUITEM : CurrencyCalculator unloaded
+; --------------------------------------------------------------------------------
+  VERSION 1
+  
+  MENUITEM #CurrencyCalculator
+    Type: 1
+    PROPERTIES
+      Name                #CurrencyCalculator
+      Label               #@CUR1
+      HelpText            #@CUR2
+      Object              #CurrencyCalculator
+      RunOn               #Called from
+      SecurityKey         #BasicMisc
+    ENDPROPERTIES
+    
+  ENDMENUITEM
+  
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculator for currencies</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR1</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+<Table:Record name="TmpSysLabel"
+       xmlns:Table='urn:www.microsoft.com/Formats/Table'>
+    <Table:Field name="Language">en-us</Table:Field>
+    <Table:Field name="Label">Calculate currency conversions based on your setup in the Exchange rates form.</Table:Field>
+    <Table:Field name="Description"></Table:Field>
+    <Table:Field name="LabelId">@CUR2</Table:Field>
+    <Table:Field name="SysLabelApplModule">0</Table:Field>
+    <Table:Field name="recVersion">0</Table:Field>
+</Table:Record>
+
+
+***Element: PRN
+
+; Microsoft Dynamics AX Project : CurrencyCalculator unloaded
+; --------------------------------------------------------------------------------
+  PROJECTVERSION 2
+  
+  PROJECT #CurrencyCalculator
+   SHARED
+  PROPERTIES
+    Name                #CurrencyCalculator
+  ENDPROPERTIES
+  
+    PROJECTCLASS ProjectNode
+    GROUP #Forms
+      PROPERTIES
+        Name                #Forms
+        ProjectGroupType    #Forms
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      BEGINNODE
+        FILETYPE 0
+        UTILTYPE 11
+        UTILOBJECTID 0
+        NODETYPE 201
+        NAME #CurrencyCalculator
+      ENDNODE
+      ENDGROUP
+      
+    GROUP #Menus
+      PROPERTIES
+        Name                #Menus
+        ProjectGroupType    #Menus
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      BEGINNODE
+        FILETYPE 0
+        UTILTYPE 16
+        UTILOBJECTID 0
+        NODETYPE 205
+        NAME #GlobalToolsMenu
+      ENDNODE
+      ENDGROUP
+      
+    GROUP #MenuItems
+      PROPERTIES
+        Name                #MenuItems
+        ProjectGroupType    #MenuItems
+        GroupMask           #
+        PreventEditProperties #No
+      ENDPROPERTIES
+      
+      GROUP #Display
+        PROPERTIES
+          Name                #Display
+          ProjectGroupType    #Display
+          GroupMask           #
+          PreventEditProperties #No
+        ENDPROPERTIES
+        
+        BEGINNODE
+          FILETYPE 0
+          UTILTYPE 1
+          UTILOBJECTID 0
+          NODETYPE 296
+          NAME #CurrencyCalculator
+        ENDNODE
+        ENDGROUP
+        
+      ENDGROUP
+      
+  ENDPROJECT
+  
+
+***Element: END
